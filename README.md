@@ -257,11 +257,6 @@ In short: inside IDH-wildtype glioblastoma, we see no link between SPINK1 and ov
 - **116 and 74**: the CGGA cohorts. In survival analysis CGGA-693 has 112 patients, because 4 have no follow-up data.
 
 
-## Citation
-
-If you use this code, please cite the article. The full reference will be added after publication.
-
-
 ## Contact
 
 Code: Melisa Ağrı (agrim22@itu.edu.tr)
