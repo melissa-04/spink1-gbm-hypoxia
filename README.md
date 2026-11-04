@@ -3,19 +3,18 @@
 This repository has the code for the bioinformatic part of our article:
 
 **SPINK1 Links Glioblastoma to Hypoxia-Associated Transcriptional Programs**
-(International Journal of Molecular Sciences, under review)
 
-All analyses use public data. The cell culture experiments of the article (siRNA silencing and RT-qPCR in U87MG cells, Figure 5) are not part of this repository.
+All analyses use public data. The cell culture experiments of the article (siRNA silencing and RT-qPCR in U87MG cells, Figure 6) are not part of this repository.
 
 The result tables are not stored here, they are in the Supplementary Tables file of the article. When you run the notebooks, the same tables and figures are written again to the `results/` folder.
 
-Some analyses were added during peer review: Table S11b-c, Figure S1, Table S16 and the analyses without tumors of unknown IDH status.
+Some analyses were added or changed during peer review: Tables S15b and S15c, Figure 5, Table S16, the analyses without tumors of unknown IDH status, the Freedman-Lane permutation test in the adjusted models (Table S10) and the two-sided p-value of the random gene set test (Table S14).
 
 
 ## Main findings
 
 - SPINK1 RNA is detected in 61% of primary IDH-wildtype glioblastomas in TCGA. In the other 39% it is not detected at all.
-- Of the 50 hallmark pathways, hypoxia has the strongest link with SPINK1. The link stays when we adjust for myeloid, proliferation and mesenchymal scores.
+- Of the 50 hallmark pathway scores, the hypoxia score has the strongest link with SPINK1, before adjustment and after adjustment for the myeloid score. The link stays when we adjust for the myeloid, proliferation and mesenchymal scores together. These scores come from the same bulk RNA data, so this does not prove that the link is fully independent of tissue composition.
 - Two hypoxia signatures made by other groups (Buffa, Winter) give the same result.
 - The result repeats in two independent CGGA cohorts, also gene by gene.
 - Removing the tumors with unknown IDH status does not change these results.
@@ -32,8 +31,8 @@ Some analyses were added during peer review: Table S11b-c, Figure S1, Table S16 
 | `03_transcriptome_gsea.ipynb` | Correlation of all genes with SPINK1, GSEA | Tables S4, S5 |
 | `04_pathway_adjustment.ipynb` | Pathway scores, adjustment, transcriptional subtypes | Tables S6-S8, Figure 2 |
 | `05_hypoxia_validation.ipynb` | Published hypoxia signatures, robustness tests | Tables S9, S10, Figure 3 |
-| `06_cgga_replication.ipynb` | Replication in two CGGA cohorts, controls | Tables S12-S15, Figure 4 |
-| `07_survival.ipynb` | Overall survival in the three cohorts | Table S11 (a-c), Figure S1 |
+| `06_cgga_replication.ipynb` | Replication in two CGGA cohorts, controls | Tables S11-S14, Figure 4 |
+| `07_survival.ipynb` | Overall survival in the three cohorts | Table S15 (a-c), Figure 5 |
 
 
 ## Data
@@ -42,7 +41,7 @@ Nothing is stored in this repository. All files are free to download.
 
 **TCGA (discovery cohort).** Glioblastoma PanCancer Atlas study on cBioPortal, file `gbm_tcga_pan_can_atlas_2018.tar.gz`
 (https://www.cbioportal.org/study/summary?id=gbm_tcga_pan_can_atlas_2018).
-We use RNA-seq (RSEM), clinical data, mutation calls, copy number (GISTIC) and the hypoxia scores (Buffa, Winter, Ragnum) that come with this study.
+We use RNA-seq (RSEM), clinical data, mutation calls, copy number (GISTIC) and the hypoxia scores (Buffa, Winter, Ragnum) that come with this study. We downloaded this file on 24 August 2026.
 
 **CGGA (validation cohorts).** From http://www.cgga.org.cn/download.jsp:
 
@@ -50,6 +49,8 @@ We use RNA-seq (RSEM), clinical data, mutation calls, copy number (GISTIC) and t
 - `CGGA.mRNAseq_693_clinical.20200506.txt.zip`
 - `CGGA.mRNAseq_325.Read_Counts-genes.20220620.txt.zip`
 - `CGGA.mRNAseq_325_clinical.20200506.txt.zip`
+
+We downloaded these files on 27 July 2026. cBioPortal and CGGA can update their files later, so our results come from the files and dates written here.
 
 Why read counts? SPINK1 is missing from the normalized expression files of CGGA, because genes with low expression were removed from those files. The read count files keep all genes, so we normalized the counts ourselves (notebook 06).
 
@@ -78,7 +79,7 @@ Run the notebooks in order, 01 to 07. Notebook 01 has to be first, because the o
 
 Every random step has a fixed seed, so you get the same numbers in every run.
 
-Main packages: pandas, numpy, scipy, statsmodels, gseapy (1.3.1), lifelines, matplotlib.
+We used Python 3.13 in Google Colab with these package versions (the same as in Section 4.11 of the article): pandas 2.2.3, numpy 2.1.3, scipy 1.16.3, statsmodels 0.15.0, gseapy 1.3.2, lifelines 0.30.3 and matplotlib 3.10.0. The other packages come with Colab, and the notebooks install gseapy and lifelines with `pip` without a version number, so a new run can get newer versions (Colab also updates its own packages from time to time). To use the same versions, write `gseapy==1.3.2` and `lifelines==0.30.3` in the `pip install` line at the top of the notebooks.
 
 
 ## A few terms we use a lot
@@ -153,11 +154,11 @@ You will see a gseapy warning that 1.68% of the genes have tied values. Tied gen
 
 To compare SPINK1 between subtypes we used the Kruskal-Wallis test, which compares more than two groups using ranks and does not need normal data.
 
-**Result.** 45 proneural, 51 classical and 48 mesenchymal tumors. SPINK1 differs between subtypes (Kruskal-Wallis p = 8.0 × 10⁻⁶): highest in mesenchymal and lowest in classical tumors (61% of classical tumors have no SPINK1). But inside every subtype SPINK1 is still positively correlated with all three hypoxia scores (9 of 9 tests positive). With the hallmark hypoxia score ρ is 0.42 to 0.48 and p < 0.01 in each subtype. Some Buffa and Winter values do not reach p < 0.05 inside a subtype, which is not surprising with only 45 to 50 tumors per subtype.
+**Result.** 45 proneural, 51 classical and 48 mesenchymal tumors. SPINK1 differs between subtypes (Kruskal-Wallis p = 8.0 × 10⁻⁶): highest in mesenchymal and lowest in classical tumors (61% of classical tumors have no SPINK1). But inside every subtype SPINK1 is still positively correlated with all three hypoxia scores (9 of 9 tests positive). These tests use the 143 tumors with published hypoxia scores, so the subtypes have 45, 50 and 48 tumors. With the hallmark hypoxia score ρ is between 0.41 and 0.48 and p < 0.01 in each subtype. Some Buffa and Winter values do not reach p < 0.05 inside a subtype, which is not surprising with so few tumors per subtype.
 
 **All covariates together, and one circularity problem (Tables S7, S8).** Next we adjusted for myeloid, mesenchymal and proliferation scores at the same time. There is a catch here. Four genes of the mesenchymal signature (COL5A1, LOX, PLAUR, SERPINE1) are also in the hallmark hypoxia set. Adjusting for a score that contains hypoxia genes would remove part of the hypoxia signal itself. So we also made a "clean" mesenchymal score without these four genes and report both versions.
 
-**Result** (n = 143, tumors with published hypoxia scores): the hallmark hypoxia link is ρ = 0.38 with the original mesenchymal score and 0.43 with the clean one. Buffa gives 0.30 and 0.33, Winter 0.32 and 0.36, all with p ≤ 0.0003. So the link is not explained by these measured covariates. This does not prove that it is fully independent of tissue composition, because the covariates are themselves estimated from bulk expression. The clean score is used in all later notebooks.
+**Result** (n = 143, tumors with published hypoxia scores): the hallmark hypoxia link is ρ = 0.38 with the original mesenchymal score and 0.43 with the clean one. Buffa gives 0.30 and 0.33, Winter 0.32 and 0.36, all with p < 0.001. So the link is not explained by these measured covariates. This does not prove that it is fully independent of tissue composition, because the covariates are themselves estimated from bulk expression. The clean score is used in all later notebooks.
 
 
 ### 05_hypoxia_validation: is the hypoxia score right? (Tables S9, S10, Figure 3)
@@ -182,9 +183,9 @@ We built the hallmark hypoxia score ourselves, so it could measure something els
 - *Only IDH-wildtype tumors (n = 140).* We remove the 3 tumors with unknown IDH status. The results stay the same or get a bit stronger: Buffa 0.37 (adjusted 0.35), Winter 0.37 (adjusted 0.37). Below the table the notebook also prints the hallmark hypoxia result for these 140 tumors: ρ = 0.55 (p = 1.2 × 10⁻¹²), adjusted 0.45 (p = 2.5 × 10⁻⁸).
 
 
-### 06_cgga_replication: does it repeat in other patients? (Tables S12-S15, Figure 4)
+### 06_cgga_replication: does it repeat in other patients? (Tables S11-S14, Figure 4)
 
-**Cohorts.** Same rules as in TCGA: primary tumor, WHO grade IV, glioblastoma histology, IDH not mutant. CGGA-693 has 116 tumors and CGGA-325 has 74, with no patient in both. In CGGA-693, 7 of the 116 tumors have no IDH information (109 are IDH-wildtype). We kept them, like the 3 TCGA tumors, and Table S12 also shows the result without them.
+**Cohorts.** Same rules as in TCGA: primary tumor, WHO grade IV, glioblastoma histology, IDH not mutant. CGGA-693 has 116 tumors and CGGA-325 has 74, with no patient in both. In CGGA-693, 7 of the 116 tumors have no IDH information (109 are IDH-wildtype). We kept them, like the 3 TCGA tumors, and Table S11 also shows the result without them.
 
 We analyze every cohort on its own and do not merge them. TCGA and CGGA give different data types (RSEM values vs read counts), and keeping the cohorts apart gives three independent tests without batch correction.
 
@@ -194,7 +195,7 @@ In CGGA-693 SPINK1 does not pass this filter because its level is low, but it is
 
 Scores are made the same way as in TCGA, inside each cohort. Hallmark hypoxia: 178 and 177 of 200 genes found. Myeloid: 9 of 11. Clean mesenchymal: 10 of 10. Proliferation: 311 of 327. SPINK1 groups follow the TCGA rule (Undetectable/Low/High: 29/44/43 and 16/29/29).
 
-**Replication (Table S12, Figure 4).**
+**Replication (Table S11, Figure 4).**
 
 - Unadjusted: ρ = 0.59 (p = 4.8 × 10⁻¹²) in CGGA-693 and 0.63 (p = 1.3 × 10⁻⁹) in CGGA-325. In TCGA it was 0.54.
 - Fully adjusted (myeloid, clean mesenchymal, proliferation): 0.21 (p = 0.025) and 0.45 (p = 8.8 × 10⁻⁵). In TCGA 0.43. The adjusted value is smaller in CGGA-693, but it stays positive and significant.
@@ -202,11 +203,11 @@ Scores are made the same way as in TCGA, inside each cohort. Hallmark hypoxia: 1
 - CGGA-693 without the 7 tumors of unknown IDH status (n = 109): 0.62 (p = 6.4 × 10⁻¹³), adjusted 0.20 (p = 0.044).
 - The 95% confidence intervals in Figure 4D use the Fisher z method with the variance correction for Spearman correlation of Fieller, Hartley and Pearson (1957): SE = sqrt(1.06 / (n - 3 - k)), where k is the number of covariates.
 
-**Gene by gene (Table S13).** If the link is real, the same hypoxia genes should go with SPINK1 in every cohort. For each hallmark hypoxia gene we computed its correlation with SPINK1 in each cohort. 176 genes have data in all three, and we compared these 176 values between cohorts.
+**Gene by gene (Table S12).** If the link is real, the same hypoxia genes should go with SPINK1 in every cohort. For each hallmark hypoxia gene we computed its correlation with SPINK1 in each cohort. 176 genes have data in all three, and we compared these 176 values between cohorts.
 
 The gene profiles agree well (ρ = 0.65 between TCGA and CGGA-693, 0.86 between TCGA and CGGA-325, 0.73 between the two CGGA cohorts). 130 of the 176 genes are positive in all three cohorts. Of the 89 genes with FDR < 0.05 in TCGA, 81 (91%) are positive in all three. The most consistent ones are known HIF targets: NDRG1, LOX, HMOX1, ANGPTL4 and PLIN2.
 
-**Pipeline controls (Table S14).** Before trusting a new result, we checked that the same pipeline finds things we already know. A positive control gene should correlate clearly with its own score, a negative control should not. Each gene is removed from the score before the test.
+**Pipeline controls (Table S13).** Before trusting a new result, we checked that the same pipeline finds things we already know. A positive control gene should correlate clearly with its own score, a negative control should not. Each gene is removed from the score before the test.
 
 - CA9, the classic HIF target, correlates with the hypoxia score (0.68 and 0.75). CA9 is not in the hallmark hypoxia set, so this is an outside check.
 - PTPRC (CD45) with the myeloid score: 0.67 and 0.78. CD68 is not in the CGGA gene list, so we used PTPRC.
@@ -215,7 +216,7 @@ The gene profiles agree well (ρ = 0.65 between TCGA and CGGA-693, 0.86 between 
 - Neuronal genes (SNAP25, SYT1, RBFOX3) with the hypoxia score: close to zero and not significant in CGGA-693 (0.06 to 0.16), negative in CGGA-325 (-0.26 to -0.40).
 - SPINK1 itself, for comparison: 0.59 and 0.63.
 
-**Random gene sets (Table S15).** In bulk tissue almost any large gene set shares some general signal, for example the share of tumor cells in the sample. So maybe SPINK1 would correlate with any big gene set, not only with hypoxia. To test this we drew 1,000 random gene sets of the same size as the hypoxia set (without hypoxia genes), made a score from each one and correlated it with SPINK1. This shows what we get by chance. The table has:
+**Random gene sets (Table S14).** In bulk tissue almost any large gene set shares some general signal, for example the share of tumor cells in the sample. So maybe SPINK1 would correlate with any big gene set, not only with hypoxia. To test this we drew 1,000 random gene sets of the same size as the hypoxia set (without hypoxia genes), made a score from each one and correlated it with SPINK1. This shows what we get by chance. The table has:
 
 - z-score = (real ρ - mean of random ρ) / SD of random ρ, so how many standard deviations the real value is away from chance.
 - `p_stronger`: share of random sets with |ρ| at least as large as the real |ρ|. It answers "is the link stronger than for random genes?".
@@ -224,7 +225,7 @@ The gene profiles agree well (ρ = 0.65 between TCGA and CGGA-693, 0.86 between 
 Random sets also correlate a little with SPINK1 (mean ρ = 0.24 and 0.11), as expected. The hypoxia set is much higher: 10.0 and 8.0 SD above the random mean (both p < 0.001). CA9 gives a similar picture (z = 7.9 and 10.6). The negative control SNAP25 is far below the random mean (z = -5.8 and -4.3, `p_two_sided` < 0.001 in both). In CGGA-693 its `p_stronger` is 1.000, because every random set correlates at least as strongly with SNAP25 as the hypoxia set does, which is what we expect from a negative control. Random sets are matched only by size, not by expression level or gene-gene correlation, so this test shows that the hypoxia link is much stronger than for size-matched random genes. It is not a proof that hypoxia is the only program linked to SPINK1.
 
 
-### 07_survival: overall survival (Table S11, Figure S1)
+### 07_survival: overall survival (Table S15, Figure 5)
 
 **Survival terms.**
 
@@ -234,9 +235,9 @@ Random sets also correlate a little with SPINK1 (mean ρ = 0.24 and 0.11), as ex
 - *HR per 1 SD.* SPINK1 has different units in TCGA (RSEM) and CGGA (CPM), so we divided SPINK1 by its standard deviation in each analysis. The HR is then the change in risk for one SD more SPINK1, and cohorts can be compared.
 - *Proportional hazards test.* The Cox model assumes that the effect of SPINK1 is the same during the whole follow-up. We tested this for SPINK1 with Schoenfeld residuals. p > 0.05 means no sign that the assumption is broken.
 
-**Table S11a: the TCGA analysis of the first submission.** In TCGA, age and sex are missing for 45 of the 143 patients with follow-up. To compare models with and without covariates on the same patients, this part uses the 98 patients with complete data. HR per log2 unit of SPINK1: 1.00 (95% CI 0.87 to 1.15, p = 0.98). Adding age and sex, then the Buffa score, then the myeloid, mesenchymal and proliferation scores does not change this (HR 0.95 to 1.02, all p > 0.6).
+**Table S15a: the TCGA analysis of the first submission.** In TCGA, age and sex are missing for 45 of the 143 patients with follow-up. To compare models with and without covariates on the same patients, this part uses the 98 patients with complete data. HR per log2 unit of SPINK1: 1.00 (95% CI 0.87 to 1.15, p = 0.98). Adding age and sex, then the Buffa score, then the myeloid, mesenchymal and proliferation scores does not change this (HR 0.95 to 1.02, all p > 0.6).
 
-**Table S11b, S11c and Figure S1: three cohorts.**
+**Tables S15b, S15c and Figure 5: three cohorts.**
 
 - Cox, unadjusted: TCGA HR 1.10 (0.92 to 1.31), CGGA-693 0.89 (0.71 to 1.12), CGGA-325 1.01 (0.80 to 1.26). With age and sex: 1.04, 0.86 and 1.02. All p > 0.2. The HRs point in different directions and all intervals include 1.
 - Without tumors of unknown IDH status: TCGA HR 1.12 (0.94 to 1.34, n = 140), CGGA-693 0.87 (0.70 to 1.08, n = 105). Same picture.
@@ -252,19 +253,12 @@ In short, within IDH-wildtype glioblastoma we did not detect an association betw
 
 - **144**: the TCGA cohort.
 - **143** (notebooks 04 and 05): one tumor (TCGA-14-0871) has no published hypoxia scores, so all analyses with Buffa, Winter or Ragnum use 143 tumors.
-- **140** (notebook 05): the 143 tumors without the 3 tumors of unknown IDH status.
+- **140** (notebooks 05 and 07): the 143 tumors without the 3 tumors of unknown IDH status.
 - **143** (notebook 07): another tumor (TCGA-28-2510) has no follow-up data.
-- **98** (Table S11a): patients with follow-up, age and sex.
+- **98** (Table S15a, and the age and sex models in Table S15b): patients with follow-up, age and sex.
 - **140** (Table S2): tumors with copy number data.
 - **116 and 74**: the CGGA cohorts. **109**: CGGA-693 without the 7 tumors of unknown IDH status.
-- **112 and 105**: CGGA-693 in the survival analysis, because 4 patients have no follow-up data.
-
-
-## Citation
-
-If you use this code, please cite the article. The full reference will be added after publication.
-
-
+- **112 and 105**: CGGA-693 in the survival analysis, because 4 patients have no follow-up data
 ## Contact
 
 Code: Melisa Ağrı (agrim22@itu.edu.tr)
